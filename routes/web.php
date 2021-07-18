@@ -54,7 +54,7 @@ Route::get('/', function () {
         $notificacoesPendentes = Notificacao::where('status', 'pendente')->count();
         $notificacoesAprovadas = Notificacao::where('status', 'aprovado')->count();
         $notificacoesTotal     = Notificacao::all()->count();
-              
+
         return view('coordenador.home_coordenador',
         ['denunciasTotal'        => $denunciasTotal,
         'denunciasArquivado'     => $denunArquivado,
@@ -192,6 +192,7 @@ Route::middleware(['IsCoordenador'])->group(function () {
     Route::get("/encontrar/requerimento",   "CoordenadorController@encontrarRequerimento")->name("encontrar.requerimento");
     Route::get("/historico/inspecoes",      "CoordenadorController@historico")->name("historico.inspecoes");
     Route::get("/pdf",                      "CoordenadorController@nameMethod")->name("gerar.pdf");
+    Route::get("/imprimirRelatorio",                      "CoordenadorController@imprimirRelatorio")->name("imprimir.relatorio");
     // Rota para gerenciar conteudo
     Route::get("/coordenador/gerenciarconteudo","ServicoController@index")->name("servico.index");
     Route::get("/coordenador/gerenciarconteudo/criar/servico","ServicoController@ajaxCriarServico");
@@ -242,7 +243,7 @@ Route::middleware(['IsCoordenador'])->group(function () {
     Route::post('/cnae/editar',                                 'CoordenadorController@cnaeEditar')->name('cnae.editar');
     Route::get('/encontrar/agente',                             'CoordenadorController@encontrarAgente')->name('encontrar.agente');
     Route::get('/encontrar/inspetor',                           'CoordenadorController@encontrarInspetor')->name('encontrar.inspetor');
-    
+
 });
 
 // Grupo de rotas para empresa
@@ -390,7 +391,7 @@ Route::middleware(['IsRespTecnico'])->group(function () {
     //tela de editar senha de acesso do rt
     Route::get('/editar/rt/senha',function () {return view('responsavel_tec/editar_senha_de_acesso');})->name('editar.senha.rt');
     Route::post('/atualizar/rt/senha',              "RespTecnicoController@atualizarSenhaDeAcesso")->name('atualizar.rt');
-    
+
     Route::get('/empresa/notificacao',              'RespTecnicoController@notificacaoEmpresa')->name('rt.notificacao.empresa');
     Route::get("/gerar/situacao/rt",                "RespTecnicoController@gerarSituacao")->name("gerar.situacao.rt");
     Route::get("/estabelecimento/encontrar/notificacoes/rt", "RespTecnicoController@encontrarNotificacoes")->name("encontrar.notificacoes.rt");

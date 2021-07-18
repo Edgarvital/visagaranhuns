@@ -42,7 +42,7 @@ class RespTecnicoController extends Controller
         //
     }
     public function home(){
-        
+
         $user = User::find(Auth::user()->id);
         $rt = RespTecnico::where('user_id', $user->id)->first();
         $notificacao = Notificacao::all();
@@ -90,7 +90,7 @@ class RespTecnicoController extends Controller
                 }
             }
         }
-        
+
 
         return view('responsavel_tec/home_rt',
         ['empresas' => $empresas,
@@ -169,7 +169,7 @@ class RespTecnicoController extends Controller
         $rt = RespTecnico::where("user_id", Auth::user()->id)->first(); //Responsavel Técnico
         $areas = RtEmpresa::where("resptec_id",$rt->id)->where('empresa_id', $empresa->id)->pluck('area_id'); //Areas especificas do responsavel técnico
         $cnaesEmpresa = CnaeEmpresa::where("empresa_id", $id)->get(); //Cnaes especificos da empresa
-        $requerimentos = Requerimento::where('empresas_id', $empresa->id) 
+        $requerimentos = Requerimento::where('empresas_id', $empresa->id)
         ->where('resptecnicos_id', $rt->id)->orderBy('created_at', 'desc')->get(); // Requerimentos da empresa
         $notificacoes = Notificacao::all();
         $check = [];
@@ -178,7 +178,7 @@ class RespTecnicoController extends Controller
         $resultado = Empresa::find($id);
         $areasIds = [];
 
-        
+
         // Pegando os ids dos cnaes da empresa
         foreach ($cnaesEmpresa as $indice0) {
             array_push($temp0, $indice0->cnae_id);
@@ -192,7 +192,7 @@ class RespTecnicoController extends Controller
 
         // Removendo areas repetidas
         $areasEstabelecimento = array_unique($areasIds);
-        
+
         // Pegando os cnaes especificos das áreas do responsavel técnico
         foreach ($areas as $indice) {
             $cnaes = Cnae::where('areas_id', $indice)->get();
@@ -258,7 +258,7 @@ class RespTecnicoController extends Controller
 
             foreach ($checklist as $key2) {
                 if ($key2->anexado == "false") {
-    
+
                     // Criando uma lista de documentos que faltam ou não anexar
                     $docsPendencia = (object) array(
                         'area'      => $key,
@@ -322,7 +322,7 @@ class RespTecnicoController extends Controller
             //     if($indice->inspecao->requerimento->resptecnicos_id == $rt->id){
             //         array_push($notificacoes, $indice);
             //     }
-            // }            
+            // }
             if ($key->empresas_id != null && $key->empresas_id == $empresa->id && $key->requerimento->resptecnicos_id != null && $key->requerimento->resptecnicos_id == $rt->id) {
                 array_push($inspecoes, $key);
             }
@@ -443,24 +443,24 @@ class RespTecnicoController extends Controller
             Storage::delete($docempresa->nome);
 
             $fileDocemp = $request->arquivo;
-    
+
             $pathDocemp = 'empresas/' . $docempresa->empresa_id . '/' . $docempresa->tipodocemp_id . '/';
-    
+
             $nomeDocemp = $request->arquivo->getClientOriginalName();
-    
+
             $docempresa->nome = $pathDocemp . $nomeDocemp;
-            
+
             if ($request->data_emissao_editar != null) {
                 $docempresa->data_emissao = $request->data_emissao_editar;
             }
             if ($request->data_validade_editar != null) {
                 $docempresa->data_validade = $request->data_validade_editar;
             }
-            
+
             $docempresa->save();
-    
+
             Storage::putFileAs($pathDocemp, $fileDocemp, $nomeDocemp);
-    
+
             session()->flash('success', 'Arquivo salvo com sucesso!');
             return back();
 
@@ -476,7 +476,7 @@ class RespTecnicoController extends Controller
             session()->flash('success', 'Datas atualizadas!');
             return back();
         }
-        
+
     }
 
     public function findDoc(Request $request)
@@ -674,19 +674,19 @@ class RespTecnicoController extends Controller
 
                 session()->flash('success', 'Responsável técnico convidado com sucesso!');
                 return back();
-                
+
             }
 
             elseif ($resptecnico != null) {
                 $validator = $request->validate([
                     'carga_horaria'  => 'required|integer',
                 ]);
-    
+
                 $passwordTemporario = Str::random(8);
                 \Illuminate\Support\Facades\Mail::send(new \App\Mail\CadastroRTcadastrado($request->email, $empresa->nome));
-    
+
                 $hoje = date('d/m/Y');
-    
+
                 for ($i=0; $i < count($request->area); $i++) {
                     $rtempresa = RtEmpresa::create([
                         'horas' => $request->carga_horaria,
@@ -697,15 +697,15 @@ class RespTecnicoController extends Controller
                         'area_id' => $request->area[$i],
                     ]);
                 }
-    
+
                 $checklistRespTecnico = Checklistresp::where('resptecnicos_id', $resptecnico->id)->exists();
-    
+
                 if ($checklistRespTecnico == false) {
                     for ($i=0; $i < count($request->area); $i++) {
                         $areatipodocresp = AreaTipodocresp::where('area_id', $request->area[$i])->get();
-        
+
                         foreach ($areatipodocresp as $indice) {
-    
+
                             $checklistresp = Checklistresp::create([
                                 'anexado' => 'false',
                                 'areas_id' => $request->area[$i],
@@ -716,7 +716,7 @@ class RespTecnicoController extends Controller
                         }
                     }
                 }
-    
+
                 session()->flash('success', 'Responsável técnico convidado com sucesso!');
                 return back();
             }
@@ -768,6 +768,8 @@ class RespTecnicoController extends Controller
                 'especializacao' => "Pendente",
                 'cpf'            => Str::random(8),
                 'telefone'       => "Pendente",
+                'conselho'       => "Pendente",
+                'num_conselho'       => "Pendente",
                 'user_id'        => $user->id,
                 // 'area_id'        => $request->area,
                 // 'empresa_id'     => $request->empresaId,
@@ -790,7 +792,7 @@ class RespTecnicoController extends Controller
             foreach ($rtempresatemp as $indice) {
                 array_push($areastemp, $indice->area_id);
             }
-            
+
             for ($i=0; $i < count($areastemp); $i++) {
                 $areatipodocresp = AreaTipodocresp::where('area_id', $areastemp[$i])->get();
 
@@ -1042,6 +1044,8 @@ class RespTecnicoController extends Controller
             'especializacao' => 'nullable|string',
             'cpf'            => 'required|string',
             'telefone'       => 'required|string',
+            'conselho' => 'required|string|max:5',
+            'num_conselho' => 'required|string|max:6',
         ]);
 
         $user->name = $request->nome;
@@ -1054,6 +1058,8 @@ class RespTecnicoController extends Controller
         }
         $respTecnico->cpf = $request->cpf;
         $respTecnico->telefone = $request->telefone;
+        $respTecnico->conselho = $request->conselho;
+        $respTecnico->num_conselho = $request->num_conselho;
         $respTecnico->save();
 
         session()->flash('success', 'Dados alterados com sucesso!');
@@ -1098,11 +1104,13 @@ class RespTecnicoController extends Controller
             'especializacao' => 'nullable|string',
             'cpf'            => 'required|string|unique:agente,cpf',
             'telefone'       => 'required|string',
+            'conselho' => 'required|string|max:5',
+            'num_conselho' => 'required|string|max:6',
             'senha'          => 'required',
 
         ], $messages);
 
-        
+
         if ($validator->fails()) {
             return back()->withErrors($validator);
         }
@@ -1113,12 +1121,14 @@ class RespTecnicoController extends Controller
         $user->status_cadastro = "aprovado";
         $user->save();
 
-        // Atualizar dados do model para responsável técnico 
+        // Atualizar dados do model para responsável técnico
         $respTecnico = RespTecnico::where('user_id', $user->id)->first();
         $respTecnico->formacao = $request->formacao;
         $respTecnico->especializacao = $request->especializacao;
         $respTecnico->cpf = $request->cpf;
         $respTecnico->telefone = $request->telefone;
+        $respTecnico->conselho = $request->conselho;
+        $respTecnico->num_conselho = $request->num_conselho;
         $respTecnico->save();
 
         return redirect()->route('/');
