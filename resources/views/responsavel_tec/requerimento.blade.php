@@ -471,7 +471,14 @@
                         $("option[value='Renovacao']").prop("disabled", true);
                         $("option[value='Renovacao Segunda Via']").prop("disabled", true);
                     }
-                } else if (response.tipo == "Renovacao") {
+                }else if (response.tipo == "Primeira Licenca") {
+                    if (response.valor == "pendente") {
+                        $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
+                    }else {
+                        $("option[value='Primeira Licenca Segunda Via']").prop("disabled", false);
+                    }
+                }
+                else if (response.tipo == "Renovacao") {
                     if (response.valor == "pendente") {
                         $("option[value='Primeira Licenca']").prop("disabled", true);
                         $("option[value='Primeira Licenca Segunda Via']").prop("disabled", false);
@@ -488,10 +495,19 @@
                         $("option[value='Renovacao']").prop("disabled", false);
                         $("option[value='Renovacao Segunda Via']").prop("disabled", true);
                     }
-                } else if (response.tipo == "nenhum") {
+                }else if (response.tipo == "Renovacao Segunda Via") {
+                    if (response.valor == "pendente") {
+                        $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                    } else {
+                        $("option[value='Renovacao Segunda Via']").prop("disabled", false);
+                    }
+                }else if (response.tipo == "nenhum") {
                     $("option[value='Primeira Licenca']").prop("disabled", false);
                     $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
                     $("option[value='Renovacao']").prop("disabled", true);
+                    $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                } else {
+                    $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
                     $("option[value='Renovacao Segunda Via']").prop("disabled", true);
                 }
             }

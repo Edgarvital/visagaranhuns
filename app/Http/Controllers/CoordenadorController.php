@@ -1578,6 +1578,48 @@ class CoordenadorController extends Controller
                             </div>
                         </div>
                     ';
+            } elseif ($item->tipo == "Primeira Licenca Segunda Via" && ($item->resptecnicos_id == null) && ($filtro == "primeira_licenca" || $filtro == "all") && ($item->status == "pendente")) {
+                $output .= '
+                        <div class="container cardListagem" id="primeiralicenca" style="margin-bottom:31px;">
+                            <div class="d-flex">
+                                <div class="mr-auto p-2">
+                                    <div class="btn-group" style="margin-bottom:-15px;">
+                                        <div class="form-group" style="font-size:15px;">
+                                            <div class="textoCampo">' . $item->empresa->nome . '</div>
+                                            <span>Segunda Via da Primeira Licença</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-2">
+                                    <div class="form-group" style="font-size:15px;">
+                                        <div>' . $item->created_at->format('d/m/Y') . '</div>
+                                    </div>
+                                </div>
+                                <div class="p-2">
+                                    <div class="dropdown">
+                                    <button class="btn btn-info  btn-sm" type="button" id="dropdownMenuButton' . $item->id . '" onclick="abrir_fechar_card_requerimento(\'' . "$item->created_at" . '\'+\'' . "$filtro" . '\'+' . $item->id . ')">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="' . $item->created_at . '' . $filtro . '' . $item->id . '" style="display:none;">
+                                <hr style="margin-bottom:-0.1rem; margin-top:-0.2rem;">
+                                <div class="d-flex">
+                                    <div class="mr-auto p-2">
+                                        <div class="btn-group" style="margin-bottom:-15px;">
+                                            <div class="form-group" style="font-size:15px; margin-top: 10px;">
+                                                <div>CNAE: <span class="textoCampo">' . $item->cnae->descricao . '</span></div>
+                                                <div>Representante Legal:<span class="textoCampo"> ' . $item->empresa->user->name . '</span></div>
+                                                <div>Status:<span class="textoCampo"> ' . $item->status . '</span></div>
+                                                <div style="margin-top:10px; margin-bottom:-10px;"><button type="button" onclick="licencaAvaliacao(' . $item->empresa->id . ',' . $item->cnae->areas_id . ',' . $item->id . ')" class="btn btn-success">Avaliar</button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ';
             }
             elseif ($item->tipo == "Renovacao" && ($item->resptecnicos_id != null) && ($filtro == "renovacao_de_licenca" || $filtro == "all") && ($item->status == "pendente")) {
                 $output .= '
