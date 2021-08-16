@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use App\RespTecnico;
 use App\User;
@@ -347,6 +348,14 @@ class RespTecnicoController extends Controller
         ]);
 
         $empresa = Empresa::find($request->empresa);
+
+        if($request->tipo == "Dispensa CNAE"){
+            return view('dispensa.dispensaCNAE', [
+                'resptecnico' => $request->resptecnico,
+                'empresa' => $empresa,
+                'cnae' => $request->cnae
+            ]);
+        }
 
         $data = date('Y-m-d');
 

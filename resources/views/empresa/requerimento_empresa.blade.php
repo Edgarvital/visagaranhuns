@@ -364,6 +364,10 @@
                                             <option id="renoLicenca2via" value="Renovacao Segunda Via">Renovação
                                             </option>
                                         </optgroup>
+                                        <optgroup label="Outros">
+                                            <option id="dispensaCNAE" value="Dispensa CNAE">Dispensa CNAE
+                                            </option>
+                                        </optgroup>
                                     </select>
                                 </div>
                             </div>
@@ -408,46 +412,72 @@
                         $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
                         $("option[value='Renovacao']").prop("disabled", true);
                         $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                        $("option[value='Dispensa CNAE']").prop("disabled", true);
                     } else if (response.valor == "aprovado") {
                         $("option[value='Primeira Licenca']").prop("disabled", true);
                         $("option[value='Primeira Licenca Segunda Via']").prop("disabled", false);
                         $("option[value='Renovacao']").prop("disabled", false);
                         $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                        $("option[value='Dispensa CNAE']").prop("disabled", true);
                     } else {
                         $("option[value='Primeira Licenca']").prop("disabled", false);
                         $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
                         $("option[value='Renovacao']").prop("disabled", true);
                         $("option[value='Renovacao Segunda Via']").prop("disabled", true);
-                    }
-                } else if (response.tipo == "Primeira Licenca") {
-                    if (response.valor == "pendente") {
-                        $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
-                    }else {
-                        $("option[value='Primeira Licenca Segunda Via']").prop("disabled", false);
+                        $("option[value='Dispensa CNAE']").prop("disabled", false);
                     }
                 } else if (response.tipo == "Renovacao") {
                     console.log("Renovacao");
                     if (response.valor == "pendente") {
                         $("option[value='Primeira Licenca']").prop("disabled", true);
-                        $("option[value='Primeira Licenca Segunda Via']").prop("disabled", false);
+                        $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
                         $("option[value='Renovacao']").prop("disabled", true);
                         $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                        $("option[value='Dispensa CNAE']").prop("disabled", true);
                     } else if (response.valor == "aprovado") {
                         $("option[value='Primeira Licenca']").prop("disabled", true);
                         $("option[value='Primeira Licenca Segunda Via']").prop("disabled", false);
-                        $("option[value='Renovacao']").prop("disabled", false);
+                        $("option[value='Renovacao']").prop("disabled", true);
                         $("option[value='Renovacao Segunda Via']").prop("disabled", false);
+                        $("option[value='Dispensa CNAE']").prop("disabled", true);
                     } else {
                         $("option[value='Primeira Licenca']").prop("disabled", true);
                         $("option[value='Primeira Licenca Segunda Via']").prop("disabled", false);
                         $("option[value='Renovacao']").prop("disabled", false);
                         $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                        $("option[value='Dispensa CNAE']").prop("disabled", true);
                     }
-                } else if (response.tipo == "Renovacao Segunda Via") {
+                } else if (response.tipo == "Primeira Licenca Segunda Via" && response.valor == "pendente") {
+                    $("option[value='Primeira Licenca']").prop("disabled", true);
+                    $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
+                    $("option[value='Renovacao']").prop("disabled", true);
+                    $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                    $("option[value='Dispensa CNAE']").prop("disabled", true);
+                } else if (response.tipo == "Renovacao Segunda Via" && response.valor == "pendente") {
+                    $("option[value='Primeira Licenca']").prop("disabled", true);
+                    $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
+                    $("option[value='Renovacao']").prop("disabled", true);
+                    $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                    $("option[value='Dispensa CNAE']").prop("disabled", true);
+                } else if (response.tipo == "Dispensa CNAE") {
                     if (response.valor == "pendente") {
+                        $("option[value='Primeira Licenca']").prop("disabled", true);
+                        $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
+                        $("option[value='Renovacao']").prop("disabled", true);
                         $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                        $("option[value='Dispensa CNAE']").prop("disabled", true);
+                    } else if (response.valor == "aprovado") {
+                        $("option[value='Primeira Licenca']").prop("disabled", true);
+                        $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
+                        $("option[value='Renovacao']").prop("disabled", true);
+                        $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                        $("option[value='Dispensa CNAE']").prop("disabled", true);
                     } else {
-                        $("option[value='Renovacao Segunda Via']").prop("disabled", false);
+                        $("option[value='Primeira Licenca']").prop("disabled", false);
+                        $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
+                        $("option[value='Renovacao']").prop("disabled", false);
+                        $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                        $("option[value='Dispensa CNAE']").prop("disabled", false);
                     }
                 } else if (response.tipo == "nenhum") {
                     console.log("Astrolábio");
@@ -455,9 +485,13 @@
                     $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
                     $("option[value='Renovacao']").prop("disabled", true);
                     $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                    $("option[value='Dispensa CNAE']").prop("disabled", false);
                 } else {
-                    $("option[value='Primeira Licenca Segunda Via']").prop("disabled", true);
-                    $("option[value='Renovacao Segunda Via']").prop("disabled", true);
+                    $("option[value='Primeira Licenca']").prop("disabled", true);
+                    $("option[value='Primeira Licenca Segunda Via']").prop("disabled", false);
+                    $("option[value='Renovacao']").prop("disabled", true);
+                    $("option[value='Renovacao Segunda Via']").prop("disabled", false);
+                    $("option[value='Dispensa CNAE']").prop("disabled", true);
                 }
             }
         });

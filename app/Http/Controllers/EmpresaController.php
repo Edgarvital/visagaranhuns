@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Dispensa;
 use Illuminate\Http\Request;
 use App\Empresa;
 use App\User;
@@ -527,6 +528,53 @@ class EmpresaController extends Controller
         return view('coordenador/show_empresa_coordenador', ['empresa' => $empresa, 'endereco' => $endereco, 'telefone' => $telefone, 'cnae' => $cnaeEmpresa, 'rt' => $resptecnicos]);
     }
 
+    public static function download($id_dispensa)
+    {
+        $arquivo = Dispensa::find($id_dispensa);
+        return response()->download(public_path('/dispensas/' . $arquivo->cnpj));
+    }
+
+    public function solicitarDispensa(Request $request)
+    {
+        $validator = $request->validate([
+            'cnpj' => 'required',
+            'dispensa' => 'required',
+        ]);
+
+        $empresa = Empresa::find($request->empresa);
+        $data = date('Y-m-d');
+
+        $requerimento = Requerimento::create([
+            'tipo' => "Dispensa CNAE",
+            'status' => "pendente",
+            'aviso' => "",
+            'cnae_id' => $request->cnae,
+            'data' => $data,
+            'resptecnicos_id' => $request->resptecnico,
+            'empresas_id' => $request->empresa,
+        ]);
+        if ($request->hasfile('cnpj')) {
+            $file = $request->file('cnpj');
+            $name = preg_replace("/[^a-zA-Z0-9]+/", "", 'dispensaCNAE') . '-' . time() . '.' . $file->extension();
+            $extensao = $file->extension();
+            $file->move(public_path() . '/dispensas/', $name);
+
+        }
+
+        $dispensa = new Dispensa();
+        $dispensa->cnpj = $name;
+        $dispensa->dispensa = $request->dispensa;
+        $dispensa->requerimento_id = $requerimento->id;
+        $dispensa->save();
+
+        session()->flash('success', 'A sua solicitação foi enviada para análise!');
+        if ($request->resptecnico != null) {
+            return redirect(route('criar.requerimento', ['empresa' => Crypt::encrypt($request->empresa)]));
+        } else {
+            return redirect(route('mostrar.requerimentos', ["value" => Crypt::encrypt($empresa->id)]));
+        }
+    }
+
     public function cadastrarRequerimento(Request $request)
     {
         $validator = $request->validate([
@@ -537,6 +585,13 @@ class EmpresaController extends Controller
         $empresa = Empresa::find($request->empresa);
 
         $data = date('Y-m-d');
+
+        if ($request->tipo == "Dispensa CNAE") {
+            return view('dispensa.dispensaCNAE', [
+                'empresa' => $empresa,
+                'cnae' => $request->cnae
+            ]);
+        }
 
         $requerimento = Requerimento::create([
             'tipo' => $request->tipo,

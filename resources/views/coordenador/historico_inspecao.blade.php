@@ -122,9 +122,14 @@
                                                     {{$agente->user->name}}<br>
                                                 @endforeach
                                             </th>
-                                            @if ($item->empresa != null)
-                                                <th class="subtituloBarraPrincipal"
-                                                    style="font-size:15px;  text-align:center; vertical-align:middle; color:black">{{$item->empresa->nome}}</th>
+                                            @if ($item->empresa != null || $item->motivo == 'Diversas')
+                                                @if($item->nome_empresa != null)
+                                                    <th class="subtituloBarraPrincipal"
+                                                        style="font-size:15px;  text-align:center; vertical-align:middle; color:black">{{$item->nome_empresa}}</th>
+                                                @else
+                                                    <th class="subtituloBarraPrincipal"
+                                                        style="font-size:15px;  text-align:center; vertical-align:middle; color:black">{{$item->empresa->nome}}</th>
+                                                @endif
                                             @elseif ($item->denuncia != null)
                                                 <th class="subtituloBarraPrincipal"
                                                     style="font-size:15px;  text-align:center; vertical-align:middle; color:black">{{$item->denuncia->empresa}}</th>
@@ -132,8 +137,13 @@
                                             <th class="subtituloBarraPrincipal"
                                                 style="font-size:15px;  text-align:center; vertical-align:middle; color:black">{{$item->motivo}}</th>
                                             @if ($item->requerimento != null)
-                                                <th class="subtituloBarraPrincipal"
-                                                    style="font-size:15px;  text-align:left; vertical-align:middle; color:black">{{$item->requerimento->cnae->descricao}}</th>
+                                                @if($item->requerimento->tipo == 'Diversas')
+                                                    <th class="subtituloBarraPrincipal"
+                                                        style="font-size:15px;  text-align:left; vertical-align:middle; color:black">Indefinido</th>
+                                                @else
+                                                    <th class="subtituloBarraPrincipal"
+                                                        style="font-size:15px;  text-align:left; vertical-align:middle; color:black">{{$item->requerimento->cnae->descricao}}</th>
+                                                @endif
                                             @else
                                                 <th class="subtituloBarraPrincipal"
                                                     style="font-size:15px;  text-align:left; vertical-align:middle; color:black"></th>

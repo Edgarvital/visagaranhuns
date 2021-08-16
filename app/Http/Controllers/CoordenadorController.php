@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Dispensa;
 use App\RelatorioAgentes;
 use Illuminate\Http\Request;
 use App\User;
@@ -310,10 +311,17 @@ class CoordenadorController extends Controller
     {
         $requerimento = Requerimento::find($request->requerimentoId);
 
-        $data = array(
-            'tipo' => $requerimento->tipo,
-            'cnae' => $requerimento->cnae->descricao,
-        );
+        if ($requerimento->tipo != 'Diversas') {
+            $data = array(
+                'tipo' => $requerimento->tipo,
+                'cnae' => $requerimento->cnae->descricao,
+            );
+        } else {
+            $data = array(
+                'tipo' => $requerimento->tipo,
+                'cnae' => 'Indefinido'
+            );
+        }
         echo json_encode($data);
     }
 
@@ -332,35 +340,130 @@ class CoordenadorController extends Controller
         ]);
     }
 
+    public function cadastrarInspecaoDiversa(Request $request)
+    {
+
+        $messages = [
+            'required' => 'O campo de :attribute deve ser preenchido!',
+            'string' => 'O campo :attribute deve conter apenas texto!',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'nome_empresa' => 'nullable|string',
+            'endereco' => 'nullable|string',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator);
+        }
+
+        if ($request->select_empresa == null) {
+            session()->flash('error', 'A empresa não foi informada!');
+            return redirect(route('criar.inspecao'));
+        }
+
+        if ($request->select_empresa != 'nenhum') {
+
+            $empresa = Empresa::find($request->select_empresa);
+            $endereco = Endereco::where('empresa_id', $request->select_empresa)->first();
+
+            $inspecao = Inspecao::find($request->inspecao_id);
+
+            $inspecao->empresas_id = $empresa->id;
+            $inspecao->nome_empresa = $empresa->nome;
+            $inspecao->endereco = $endereco->rua . ',' . $endereco->numero . ',' . $endereco->bairro;
+            $inspecao->update();
+
+            session()->flash('success', 'Sua inspeção foi cadastrada!');
+            return redirect(route('criar.inspecao'));
+
+        } else {
+
+            if ($request->nome_empresa == null || $request->endereco == null) {
+                session()->flash('error', 'O campo "Empresa" ou "Endereco" não foi passado!');
+                return back();
+            }
+            $inspecao = Inspecao::find($request->inspecao_id);
+
+            $inspecao->nome_empresa = $request->nome_empresa;
+            $inspecao->endereco = $request->endereco;
+            $inspecao->update();
+
+            session()->flash('success', 'Sua inspeção foi cadastrada!');
+            return redirect(route('criar.inspecao'));
+        }
+    }
+
+    public function InspecaoDiversa($id)
+    {
+        $empresa = Empresa::all();
+        return view('coordenador.requerimentoDiverso', [
+            'inspecao_id' => $id,
+            'empresas' => $empresa,
+        ]);
+    }
+
     public function cadastrarInspecao(Request $request)
     {
         if (isset($request->requerimentos)) {
             foreach ($request->requerimentos as $indice) {
                 $requerimento = Requerimento::find($indice);
-                $inspecao = Inspecao::create([
-                    'data' => $request->data,
-                    'status' => 'pendente',
-                    'inspetor_id' => $request->inspetor,
-                    'requerimento_id' => $indice,
-                    'empresas_id' => $requerimento->empresa->id,
-                    'denuncias_id' => null,
-                    'motivo' => $requerimento->tipo,
-                ]);
+                if ($requerimento->tipo == "Diversas") {
+                    $inspecao = Inspecao::create([
+                        'data' => $request->data,
+                        'status' => 'pendente',
+                        'inspetor_id' => $request->inspetor,
+                        'requerimento_id' => $indice,
+                        'empresas_id' => null,
+                        'denuncias_id' => null,
+                        'motivo' => $requerimento->tipo,
+                    ]);
 
-                foreach ($request->agenteRequired as $agente) {
-                    if ($agente != null) {
-                        $inspecao->agentes()->attach($agente);
-                    }
-                }
-
-                if ($request->agenteOpt != null) {
-                    foreach ($request->agenteOpt as $agente) {
+                    foreach ($request->agenteRequired as $agente) {
                         if ($agente != null) {
                             $inspecao->agentes()->attach($agente);
                         }
                     }
+
+                    if ($request->agenteOpt != null) {
+                        foreach ($request->agenteOpt as $agente) {
+                            if ($agente != null) {
+                                $inspecao->agentes()->attach($agente);
+                            }
+                        }
+                    }
+                    return redirect(route('cadastro.inspecao', ['inspecao_id' => $inspecao->id]));
+
+                } else {
+                    $inspecao = Inspecao::create([
+                        'data' => $request->data,
+                        'status' => 'pendente',
+                        'inspetor_id' => $request->inspetor,
+                        'requerimento_id' => $indice,
+                        'empresas_id' => $requerimento->empresa->id,
+                        'denuncias_id' => null,
+                        'motivo' => $requerimento->tipo,
+                    ]);
+
+
+                    foreach ($request->agenteRequired as $agente) {
+                        if ($agente != null) {
+                            $inspecao->agentes()->attach($agente);
+                        }
+                    }
+
+                    if ($request->agenteOpt != null) {
+                        foreach ($request->agenteOpt as $agente) {
+                            if ($agente != null) {
+                                $inspecao->agentes()->attach($agente);
+                            }
+                        }
+                    }
                 }
+
             }
+
         }
 
         if (isset($request->denuncias)) {
@@ -749,7 +852,7 @@ class CoordenadorController extends Controller
 
         foreach ($resultados as $indice) {
             $inspecao = Inspecao::where('requerimento_id', $indice->id)->first();
-            if ($inspecao == null) {
+            if ($inspecao == null || $indice->tipo == 'Diversas') {
                 array_push($resultado, $indice);
             }
         }
@@ -806,7 +909,8 @@ class CoordenadorController extends Controller
         $output = '';
         if (count($resultado) > 0) {
             foreach ($resultado as $item) {
-                $output .= '
+                if ($item->empresa != null) {
+                    $output .= '
                     <div class="d-flex justify-content-center cardMeuCnae" onmouseenter="mostrarBotaoAdicionar(' . $item->id . ')">
                         <div class="mr-auto p-2>OPA</div>
                             <div class="mr-auto p-2">
@@ -827,6 +931,29 @@ class CoordenadorController extends Controller
                     </div>
 
                     ';
+                } else {
+                    $output .= '
+                    <div class="d-flex justify-content-center cardMeuCnae" onmouseenter="mostrarBotaoAdicionar(' . $item->id . ')">
+                        <div class="mr-auto p-2>OPA</div>
+                            <div class="mr-auto p-2">
+                                <div class="btn-group" style="margin-bottom:-15px;">
+                                    <div class="form-group" style="font-size:15px;">
+                                        <div class="textoCampo" id="' . $item->id . '">Inspeção sem aviso prévio</div>
+                                        <div>Tipo: <span class="textoCampo">' . $item->tipo . '</span></div>
+                                        <div>Cnae: <span class="textoCampo">Indefinido</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="width:140px; height:25px; text-align:right;">
+                                <div id="cardSelecionado' . $item->id . '" class="btn-group" style="display:none;">
+                                    <div class="btn btn-success btn-sm"  onclick="addRequerimento(' . $item->id . ')" >Adicionar</div>
+                                </div>
+                            </div>
+
+                    </div>
+
+                    ';
+                }
             }
         }
         if (isset($denuncias)) {
@@ -1010,6 +1137,20 @@ class CoordenadorController extends Controller
             );
             echo json_encode($data);
         }
+    }
+
+    public function dispensa(Request $request)
+    {
+        $empresa = Empresa::find($request->empresa);
+        $dispensa = Dispensa::where('requerimento_id', '=', $request->requerimento)->first();
+
+        return view("coordenador/avaliar_dispensa")->with([
+            "dispensa" => $dispensa,
+            "empresa" => $empresa,
+            "requerimento" => $request->requerimento,
+        ]);
+
+
     }
 
     public function licenca(Request $request)
@@ -1494,7 +1635,91 @@ class CoordenadorController extends Controller
                             </div>
                         </div>
                     ';
-            }elseif (($item->tipo == "Primeira Licenca Segunda Via") && ($item->resptecnicos_id != null) && ($filtro == "primeira_licenca" || $filtro == "all") && ($item->status == "pendente")) {
+            } else if (($item->tipo == "Dispensa CNAE") && ($item->resptecnicos_id != null) && ($filtro == "dispensa_cnae" || $filtro == "all") && ($item->status == "pendente")) {
+                $output .= '
+                        <div class="container cardListagem" id="dispensaCnae" style="margin-bottom:20px;">
+                            <div class="d-flex">
+                                <div class="mr-auto p-2">
+                                    <div class="btn-group" style="margin-bottom:-15px;">
+                                        <div class="form-group" style="font-size:15px;">
+                                            <div class="textoCampo">' . $item->empresa->nome . '</div>
+                                            <span>Dispensa CNAE</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-2">
+                                    <div class="form-group" style="font-size:15px;">
+                                        <div>' . $item->created_at->format('d/m/Y') . '</div>
+                                    </div>
+                                </div>
+                                <div class="p-2">
+                                    <div class="dropdown">
+                                    <button class="btn btn-info  btn-sm" type="button" id="dropdownMenuButton' . $item->id . '" onclick="abrir_fechar_card_requerimento(\'' . "$item->created_at" . '\'+\'' . "$filtro" . '\'+' . $item->id . ')">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="' . $item->created_at . '' . $filtro . '' . $item->id . '" style="display:none;">
+                                <hr style="margin-bottom:-0.1rem; margin-top:-0.2rem;">
+                                <div class="d-flex">
+                                    <div class="mr-auto p-2">
+                                        <div class="btn-group" style="margin-bottom:-15px;">
+                                            <div class="form-group" style="font-size:15px;">
+                                                <div>CNAE: <span class="textoCampo">' . $item->cnae->descricao . '</span></div>
+                                                <div>Responsável Técnico:<span class="textoCampo"> ' . $item->resptecnico->user->name . '</span></div>
+                                                <div>Status:<span class="textoCampo"> ' . $item->status . '</span></div>
+                                                <div style="margin-top:10px; margin-bottom:-10px;"><button type="button" onclick="dispensaAvaliacao(' . $item->empresa->id . ',' . $item->cnae->areas_id . ',' . $item->id . ')" class="btn btn-success">Avaliar</button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ';
+            } elseif ($item->tipo == "Dispensa CNAE" && ($item->resptecnicos_id == null) && ($filtro == "dispensa_cnae" || $filtro == "all") && ($item->status == "pendente")) {
+                $output .= '
+                        <div class="container cardListagem" id="dispensaCnae" style="margin-bottom:31px;">
+                            <div class="d-flex">
+                                <div class="mr-auto p-2">
+                                    <div class="btn-group" style="margin-bottom:-15px;">
+                                        <div class="form-group" style="font-size:15px;">
+                                            <div class="textoCampo">' . $item->empresa->nome . '</div>
+                                            <span>Dispensa CNAE</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-2">
+                                    <div class="form-group" style="font-size:15px;">
+                                        <div>' . $item->created_at->format('d/m/Y') . '</div>
+                                    </div>
+                                </div>
+                                <div class="p-2">
+                                    <div class="dropdown">
+                                    <button class="btn btn-info  btn-sm" type="button" id="dropdownMenuButton' . $item->id . '" onclick="abrir_fechar_card_requerimento(\'' . "$item->created_at" . '\'+\'' . "$filtro" . '\'+' . $item->id . ')">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="' . $item->created_at . '' . $filtro . '' . $item->id . '" style="display:none;">
+                                <hr style="margin-bottom:-0.1rem; margin-top:-0.2rem;">
+                                <div class="d-flex">
+                                    <div class="mr-auto p-2">
+                                        <div class="btn-group" style="margin-bottom:-15px;">
+                                            <div class="form-group" style="font-size:15px; margin-top: 10px;">
+                                                <div>CNAE: <span class="textoCampo">' . $item->cnae->descricao . '</span></div>
+                                                <div>Representante Legal:<span class="textoCampo"> ' . $item->empresa->user->name . '</span></div>
+                                                <div>Status:<span class="textoCampo"> ' . $item->status . '</span></div>
+                                                <div style="margin-top:10px; margin-bottom:-10px;"><button type="button" onclick="dispensaAvaliacao(' . $item->empresa->id . ',' . $item->cnae->areas_id . ',' . $item->id . ')" class="btn btn-success">Avaliar</button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ';
+            } elseif (($item->tipo == "Primeira Licenca Segunda Via") && ($item->resptecnicos_id != null) && ($filtro == "primeira_licenca" || $filtro == "all") && ($item->status == "pendente")) {
                 $output .= '
                         <div class="container cardListagem" id="primeiralicenca" style="margin-bottom:20px;">
                             <div class="d-flex">
@@ -1620,8 +1845,7 @@ class CoordenadorController extends Controller
                             </div>
                         </div>
                     ';
-            }
-            elseif ($item->tipo == "Renovacao" && ($item->resptecnicos_id != null) && ($filtro == "renovacao_de_licenca" || $filtro == "all") && ($item->status == "pendente")) {
+            } elseif ($item->tipo == "Renovacao" && ($item->resptecnicos_id != null) && ($filtro == "renovacao_de_licenca" || $filtro == "all") && ($item->status == "pendente")) {
                 $output .= '
                     <div class="container cardListagem" style="margin-bottom:30px;">
                         <div class="d-flex">
@@ -1705,8 +1929,7 @@ class CoordenadorController extends Controller
                         </div>
                     </div>
                 ';
-            }
-            elseif ($item->tipo == "Renovacao Segunda Via" && ($item->resptecnicos_id != null) && ($filtro == "renovacao_de_licenca" || $filtro == "all") && ($item->status == "pendente")) {
+            } elseif ($item->tipo == "Renovacao Segunda Via" && ($item->resptecnicos_id != null) && ($filtro == "renovacao_de_licenca" || $filtro == "all") && ($item->status == "pendente")) {
                 $output .= '
                     <div class="container cardListagem" style="margin-bottom:30px;">
                         <div class="d-flex">
