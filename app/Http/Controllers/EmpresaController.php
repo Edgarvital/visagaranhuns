@@ -473,6 +473,14 @@ class EmpresaController extends Controller
             ->where('area_id', $request->idArea)
             ->delete();
 
+        $respTecnico = RespTecnico::where('id', '=', $request->idRespTecnico)->first();
+        $empresa = Empresa::find($request->idEmpresa)->first();
+        $coords = User::where('tipo', '=', 'coordenador')->get();
+        foreach ($coords as $coord) {
+            \Illuminate\Support\Facades\Mail::send(new \App\Mail\SaidaRT($coord, $respTecnico, $empresa));
+        }
+
+
         // $respTecnico  = RespTecnico::find($request->idRespTecnico);
         // $user         = User::find($respTecnico->user_id);
 
