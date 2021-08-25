@@ -254,6 +254,7 @@ Route::middleware(['IsCoordenador'])->group(function () {
 });
 
 Route::post('/solicitar/dispensa/empresa', 'EmpresaController@solicitarDispensa')->name('solicitar.dispensa.empresa');
+Route::get('/solicitar/dispensa', 'EmpresaController@dispensa')->name('solicitar.dispensa');
 
 // Grupo de rotas para empresa
 Route::middleware(['IsEmpresa'])->group(function () {

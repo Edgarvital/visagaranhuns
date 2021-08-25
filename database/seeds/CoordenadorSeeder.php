@@ -14,7 +14,7 @@ class CoordenadorSeeder extends Seeder
     {
         \App\User::create([
             'name' => 'coordenador',
-            'email' => 'adgar.carvalho@hotmail.com',
+            'email' => 'coordenador@teste.com',
             'password' => Hash::make('123456'),
             'tipo' => 'coordenador',
             'status_cadastro' => 'aprovado',

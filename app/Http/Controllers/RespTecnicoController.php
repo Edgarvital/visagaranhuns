@@ -16,6 +16,7 @@ use App\Docresptec;
 use App\Docempresa;
 use App\Requerimento;
 use Auth;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use App\RtEmpresa;
 use App\CnaeEmpresa;
@@ -350,11 +351,7 @@ class RespTecnicoController extends Controller
         $empresa = Empresa::find($request->empresa);
 
         if ($request->tipo == "Dispensa CNAE") {
-            return view('dispensa.dispensaCNAE', [
-                'resptecnico' => $request->resptecnico,
-                'empresa' => $empresa,
-                'cnae' => $request->cnae
-            ]);
+            return Redirect::route('solicitar.dispensa', ['empresa' => $empresa, 'cnae' => $request->cnae, 'resptecnico' => $request->resptecnico]);
         }
 
         $data = date('Y-m-d');

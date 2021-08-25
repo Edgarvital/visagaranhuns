@@ -20,6 +20,7 @@ use App\Tipodocempresa;
 use App\Tipodocresp;
 use App\Inspecao;
 use App\Notificacao;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Auth;
 use DateTime;
@@ -542,12 +543,35 @@ class EmpresaController extends Controller
         return response()->download(public_path('/dispensas/' . $arquivo->cnpj));
     }
 
+    public function dispensa(Request $request){
+        $empresa = Empresa::find($request->empresa);
+        return view('dispensa.dispensaCNAE', [
+            'empresa' => $empresa,
+            'cnae' => $request->cnae,
+            'resptecnico' => $request->resptecnico,
+        ]);
+
+    }
+
     public function solicitarDispensa(Request $request)
     {
-        $validator = $request->validate([
-            'cnpj' => 'required',
+
+        $messages = [
+            'max' => 'O tamanho máximo do arquivo deve ser de 5mb!',
+            'required' => 'O campo :attribute não foi passado!',
+            'mimes' => 'O arquivo anexado não está no formato pdf!',
+            'file' => 'Um arquivo deve ser anexado!',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'cnpj' => 'required|file|mimes:pdf|max:5000',
             'dispensa' => 'required',
-        ]);
+        ], $messages);
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator);
+        }
 
         $empresa = Empresa::find($request->empresa);
         $data = date('Y-m-d');
@@ -561,6 +585,7 @@ class EmpresaController extends Controller
             'resptecnicos_id' => $request->resptecnico,
             'empresas_id' => $request->empresa,
         ]);
+
         if ($request->hasfile('cnpj')) {
             $file = $request->file('cnpj');
             $name = preg_replace("/[^a-zA-Z0-9]+/", "", 'dispensaCNAE') . '-' . time() . '.' . $file->extension();
@@ -595,10 +620,7 @@ class EmpresaController extends Controller
         $data = date('Y-m-d');
 
         if ($request->tipo == "Dispensa CNAE") {
-            return view('dispensa.dispensaCNAE', [
-                'empresa' => $empresa,
-                'cnae' => $request->cnae
-            ]);
+            return Redirect::route('solicitar.dispensa', ['empresa' => $empresa, 'cnae' => $request->cnae]);
         }
 
         $requerimento = Requerimento::create([

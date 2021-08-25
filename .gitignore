@@ -3,6 +3,7 @@
 /public/storage
 /public/icones
 /public/imagens
+/public/dispensas/
 /storage/*.key
 /vendor
 .idea/
