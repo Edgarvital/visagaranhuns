@@ -100,6 +100,12 @@
                                     <input class="styleInputCadastro" id="endereco" name="endereco" placeholder=""
                                            value="">
                                 </div>
+                                <div class="form-group col-md-4" id="infos3"
+                                     style="padding-right:15px; display: none; opacity:1;">
+                                    <label class="styleTituloDoInputCadastro" for="cpf">CPF/CNPJ:</label>
+                                    <input class="styleInputCadastro" id="cpfcnpj" name="cpfcnpj" placeholder=""
+                                           value="">
+                                </div>
                             </div>
                             {{-- <div class="form-row">
                                 <div class="form-row">
@@ -145,12 +151,14 @@
                 document.getElementById('endereco').value = '';
                 document.getElementById('infos1').style.display = 'block';
                 document.getElementById('infos2').style.display = 'block';
+                document.getElementById('infos3').style.display = 'block';
             } else {
                 console.log('Agora foi aqui!');
                 document.getElementById('empresa').value = '';
                 document.getElementById('endereco').value = '';
                 document.getElementById('infos1').style.display = 'none';
                 document.getElementById('infos2').style.display = 'none';
+                document.getElementById('infos3').style.display = 'none';
             }
 
             // if ($id_empresa == 'nenhum') {

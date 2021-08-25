@@ -139,52 +139,59 @@
                 ESTABELECIMENTO</h2></div>
         <div style="margin-left: 3%;margin-top: 10px;">
             <ul>
-                <li><b>Razão Social: </b>{{$empresa->nome}}</li>
-                <li><b>CNPJ: </b> {{$empresa->cnpjcpf}}</li>
-                @if($empresa->nome_fantasia != null)
-                    <li><b>Nome de Fantasia: </b>{{$empresa->nome_fantasia}}</li>
+                @if($empresa != null)
+                    <li><b>Razão Social: </b>{{$empresa->nome}}</li>
+                    <li><b>CNPJ: </b> {{$empresa->cnpjcpf}}</li>
+                    @if($empresa->nome_fantasia != null)
+                        <li><b>Nome de Fantasia: </b>{{$empresa->nome_fantasia}}</li>
+                    @endif
+                    <li>
+                        <table>
+                            <tr>
+                                <td style="width: 60%">
+                                    <b>Endereço: </b>{{$endereço->rua}}
+                                </td>
+                                <td>
+                                    <b>N°: </b>{{$endereço->numero}}
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                    <li>
+                        <table>
+                            <tr>
+                                <td style="width: 60%">
+                                    <b>CEP: </b>{{$endereço->cep}}
+                                </td>
+                                <td>
+                                    <b>Bairro: </b>{{$endereço->bairro}}
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                    <li>
+                        <table>
+                            <tr>
+                                <td style="width: 60%">
+                                    <b>Complemento:</b>
+                                    @if($endereço->complemento != null)
+                                        {{$endereço->complemento}}
+                                    @else
+                                        Nenhum
+                                    @endif
+                                </td>
+                                <td>
+                                    <b>Cidade/UF: </b>{{$endereço->cidade}}/{{$endereço->uf}}
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                @else
+                    <li><b>Razão Social: </b>{{$inspecao->nome_empresa}}</li>
+                    <li><b>CNPJ: </b> Indefinido</li>
+                    <li><b>Endereço: </b> {{$inspecao->endereco}}</li>
                 @endif
-                <li>
-                    <table>
-                        <tr>
-                            <td style="width: 60%">
-                                <b>Endereço: </b>{{$endereço->rua}}
-                            </td>
-                            <td>
-                                <b>N°: </b>{{$endereço->numero}}
-                            </td>
-                        </tr>
-                    </table>
-                </li>
-                <li>
-                    <table>
-                        <tr>
-                            <td style="width: 60%">
-                                <b>CEP: </b>{{$endereço->cep}}
-                            </td>
-                            <td>
-                                <b>Bairro: </b>{{$endereço->bairro}}
-                            </td>
-                        </tr>
-                    </table>
-                </li>
-                <li>
-                    <table>
-                        <tr>
-                            <td style="width: 60%">
-                                <b>Complemento:</b>
-                                @if($endereço->complemento != null)
-                                    {{$endereço->complemento}}
-                                @else
-                                    Nenhum
-                                @endif
-                            </td>
-                            <td>
-                                <b>Cidade/UF: </b>{{$endereço->cidade}}/{{$endereço->uf}}
-                            </td>
-                        </tr>
-                    </table>
-                </li>
+
             </ul>
         </div>
 
@@ -202,8 +209,7 @@
                 </li>
                 <li>
                     <b>Equipe Fiscalização:</b>
-                    {{$inspetor->user->name}}@foreach($agentesInspec as $agente)
-                        , {{\App\Agente::where('id', '=', $agente->agente_id)->first()->user->name}}@endforeach.
+                    {{$inspetor->user->name}}@foreach($agentesInspec as $agente), {{\App\Agente::where('id', '=', $agente->agente_id)->first()->user->name}}@endforeach.
                 </li>
             </ul>
         </div>

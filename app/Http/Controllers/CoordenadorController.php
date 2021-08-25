@@ -115,7 +115,11 @@ class CoordenadorController extends Controller
         $inspecao = Inspecao::find(Crypt::decrypt($request->inspecao_id))->first();
         $empresa = Empresa::where('id', '=', $inspecao->empresas_id)->first();
         $relatorio = InspecaoRelatorio::where('inspecao_id', '=', Crypt::decrypt($request->inspecao_id))->first();
-        $endereço = Endereco::where('empresa_id', '=', $empresa->id)->first();
+        if ($empresa != null) {
+            $endereço = Endereco::where('empresa_id', '=', $empresa->id)->first();
+        } else {
+            $endereço = null;
+        }
         $inspetor = Inspetor::where('id', '=', $inspecao->inspetor_id)->first();
         $agentesInspec = InspecAgente::where('inspecoes_id', '=', $inspecao->id)->get();
 
@@ -150,9 +154,24 @@ class CoordenadorController extends Controller
                     $emp->complemento = "Empresa não cadastrada";
                     $emp->telefone1 = "Empresa não cadastrada";
                     $emp->telefone2 = "Empresa não cadastrada";
-                } else {
+                }
+                else {
                     $emp = $inspecao->denuncia->empresaRelacionamento;
                 }
+            } elseif($inspecao->motivo == "Diversas"){
+                $emp = new Empresa();
+                $emp->nome = $inspecao->nome_empresa;
+                $emp->email = "Empresa não cadastrada";
+                $emp->cnpjcpf = $inspecao->cpfcnpj;
+                $emp->tipo = "Empresa não cadastrada";
+                $emp->endereco = $inspecao->endereco;
+                $emp->cep = "Empresa não cadastrada";
+                $emp->rua = "Empresa não cadastrada";
+                $emp->numero = "Empresa não cadastrada";
+                $emp->bairro = "Empresa não cadastrada";
+                $emp->complemento = "Empresa não cadastrada";
+                $emp->telefone1 = "Empresa não cadastrada";
+                $emp->telefone2 = "Empresa não cadastrada";
             }
             if ($emp != null && !($emps->contains($emp))) {
                 $emps->push($emp);
@@ -351,6 +370,7 @@ class CoordenadorController extends Controller
         $validator = Validator::make($request->all(), [
             'nome_empresa' => 'nullable|string',
             'endereco' => 'nullable|string',
+            'cpfcnpj' => 'nullable|string'
         ], $messages);
 
         if ($validator->fails()) {
@@ -380,14 +400,15 @@ class CoordenadorController extends Controller
 
         } else {
 
-            if ($request->nome_empresa == null || $request->endereco == null) {
-                session()->flash('error', 'O campo "Empresa" ou "Endereco" não foi passado!');
+            if ($request->nome_empresa == null || $request->endereco == null || $request->cpfcnpj == null) {
+                session()->flash('error', 'O campo "Empresa", "Endereco" ou "CPF/CNPJ" não foi passado!');
                 return back();
             }
             $inspecao = Inspecao::find($request->inspecao_id);
 
             $inspecao->nome_empresa = $request->nome_empresa;
             $inspecao->endereco = $request->endereco;
+            $inspecao->cpfcnpj = $request->cpfcnpj;
             $inspecao->update();
 
             session()->flash('success', 'Sua inspeção foi cadastrada!');
